@@ -1,7 +1,7 @@
 const input = { keys: {}, mouse: {} }
 const game = {
 
-    inGame: true,
+    inGame: false,
     inLevelSelect: false,
     jumpscare: false,
     won: false,
@@ -822,6 +822,7 @@ class AudioWrapper {
 
     stop() {
         this.audio.pause();
+        this.audio.loop = false;
         this.audio.currentTime = 0;
     }
 
@@ -984,8 +985,6 @@ function lineIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
 function setup() {
     textFont('Comic Sans MS');
     createCanvas(900, 600);
-
-    setLevel(35);
 }
 
 function setLevel(level) {
@@ -1041,21 +1040,28 @@ function mouseReleased() {
     if (game.inGame && game.strokeStartX > 0 && game.strokeStartY > 0) {
         if (game.credits > 0) {
             game.credits = 0;
-            SOUNDS.MUSIC.stop();
+            SOUNDS.CREDITS.stop();
             game.inGame = false;
             game.inLevelSelect = false;
-        }
-        if (game.bossApproaching > 0 || game.garlIntro > 0) {
-            reset();
-        } else if (game.won) {
-            if (game.level === 35) {
-                game.credits = millis();
-            } else {
-                nextLevel();
-            }
         } else {
-            if (rawStrokeStrength() > 20 && canStroke()) {
-                strokeThatThang();
+            if (game.bossApproaching > 0 || game.garlIntro > 0) {
+                reset();
+            } else if (game.won) {
+                if (game.level === 35) {
+                    game.credits = millis();
+                    SOUNDS.MUSIC.stop();
+                    SOUNDS.CREDITS.playMusicLoop();
+                } else {
+                    if (game.selectFromMenu) {
+                        game.inGame = false;
+                    } else {
+                        nextLevel();
+                    }
+                }
+            } else {
+                if (rawStrokeStrength() > 20 && canStroke()) {
+                    strokeThatThang();
+                }
             }
         }
     }
@@ -1195,7 +1201,7 @@ function update() {
         reset();
     }
 
-    if (game.jumpscare || game.bossApproaching > 0 || game.garlIntro > 0) {
+    if (game.jumpscare || game.bossApproaching > 0 || game.garlIntro > 0 || game.credits > 0) {
         return;
     }
 
@@ -1560,7 +1566,9 @@ function draw() {
             stroke(0);
             drawButton(400, 350, 400, 40, () => {
                 game.inGame = true;
+                game.bossHealth = 0;
                 setLevel(0);
+                reset();
             });
             drawButton(400, 400, 400, 40, () => {
                 game.inLevelSelect = true;
@@ -1576,20 +1584,33 @@ function draw() {
             noStroke();
             textAlign(CENTER, CENTER);
             textSize(24);
+
+            fill(230);
+            stroke(0);
+            drawButton(50, 300, 200, 100, () => {
+                game.inLevelSelect = false;
+            })
+
+            fill(0);
+            noStroke();
+            text('< back', 150, 350);
             
             for (let i = 0; i < 36; i += 1) {
                 const y = floor(i / 6);
                 const x = i % 6;
 
-                drawButton(x * 100, y * 100, 100, 100, () => {
+                fill(230);
+                stroke(0);
+                drawButton(300 + x * 100, y * 100, 100, 100, () => {
                     game.selectFromMenu = true;
                     game.inGame = true;
                     setLevel(i);
+                    reset();
                 });
 
                 fill(0);
                 noStroke();
-                text(i + 1, x * 100 + 50, y * 100 + 50);
+                text(i + 1, 300 + x * 100 + 50, y * 100 + 50);
             }
 
         }
@@ -1609,7 +1630,7 @@ function draw() {
         push();
         translate(300, 600 - up);
 
-        image(IMAGES.LOGO, 100, 100, 400, 200);
+        image(IMAGES.LOGO, 100, 0, 400, 200);
         textAlign(CENTER, TOP);
         textSize(24);
         fill(0);
@@ -1621,8 +1642,10 @@ function draw() {
         text('featuring', 300, 500);
         text('my guy karl', 300, 550);
 
-        text('with voice talent from', 300, 500);
-        text('@kidactivisttt ig', 300, 550);
+        text('with voice talent from', 300, 700);
+        text('@kidactivisttt ig', 300, 750);
+
+        text('thanks for playing gang', 300, 1000);
 
         pop();
         return;
@@ -1941,9 +1964,9 @@ function draw() {
         text(f.text, f.pos[0], f.pos[1]);
     }
 
-    image(IMAGES.GARL, 200 + random(-2, 2), random(-2, 2), 200, 100);
-
     if (game.level === 35) {
+        image(IMAGES.GARL, 200 + random(-2, 2), random(-2, 2), 200, 100);
+
         strokeWeight(1);
         fill(0);
         stroke(0);
