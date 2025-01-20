@@ -1636,16 +1636,19 @@ function draw() {
         fill(0);
         noStroke();
 
-        text('game design / code', 300, 300);
+        text('game art / code', 300, 300);
         text('harper k davis', 300, 350);
 
-        text('featuring', 300, 500);
-        text('my guy karl', 300, 550);
+        text('original concept / inspiration', 300, 500);
+        text('SlappyHappy2000 (SH2K)', 300, 550);
 
-        text('with voice talent from', 300, 700);
-        text('@kidactivisttt ig', 300, 750);
+        text('featuring', 300, 700);
+        text('my guy karl', 300, 750);
 
-        text('thanks for playing gang', 300, 1000);
+        text('with voice talent from', 300, 900);
+        text('@kidactivisttt ig', 300, 950);
+
+        text('thanks for playing gang <3', 300, 1100);
 
         pop();
         return;
